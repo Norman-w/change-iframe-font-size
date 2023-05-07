@@ -25,6 +25,7 @@
         <li>使用rem单位的矩形等也会跟着变化</li>
         <li>当iframe的外容器没有固定宽高信息时(如100%),iframe不能触发onresize,所以要给一个固定的大小.但通常iframe的容器大小也是百分比单位,要用hook设置大小.</li>
         <li>iframe需要使用百分比停靠在container中时,不显式指定样式的百分比,宽高由js控制,否则不会触发frame的onresize</li>
+        <li>使用ResizeObserver时候注意第一次回调是在加载时</li>
     </ul>
     <script>
         //默认iframe的字体大小
@@ -35,7 +36,7 @@
             document.getElementById('frame').contentWindow.document.body.style.backgroundColor = 'yellow';
             document.getElementById('frame').contentWindow.document.getElementsByTagName("html")[0].style.fontSize = defaultFontSize + 'px';
             //设置iframe为100%大小
-            onIframeContainerSizeChange();
+            updateIframeContentSize();
         }
         //endregion
         //region 当iFrame的大小发生变化时，可以修改iFrame的样式,设置rem之类
@@ -45,10 +46,13 @@
             let newFontSize = (16 * scale).toFixed(2);
             document.getElementById('frame').contentWindow.document.getElementsByTagName("html")[0].style.fontSize = newFontSize + 'px';
         }
-        function onIframeContainerSizeChange(e){
-             //设置iframe的大小
+        //endregion
+        //region 更新iframe content的尺寸
+        function updateIframeContentSize(e){
+            //设置iframe的大小
             let width = document.getElementById('wrap').offsetWidth;
             let height = document.getElementById('wrap').offsetHeight;
+            console.log('iframe container size changed', width, height);
             document.getElementById('frame').style.width = width + 'px';
             document.getElementById('frame').style.height = height + 'px';
         }
@@ -57,7 +61,18 @@
         document.getElementById('frame').onload = onIframeLoad;
         document.getElementById('frame').contentWindow.onresize = onIframeSizeChange;
         //暂模拟窗体大小发生变化时即为iframe的容器大小发生变化
-        window.addEventListener('resize',onIframeContainerSizeChange);
+        let isFirst = true;
+        const resizeObserver = new ResizeObserver(entries => {
+            //load时候也会加载一次,第一次resize是不需要触发的
+            if (isFirst) {
+                // console.log('初次加载时first resizeObserver', entries);
+                isFirst = false;
+                return;
+            }
+            this.updateIframeContentSize();
+            // console.log('一般时大小变化resizeObserver', entries)
+        })
+        resizeObserver.observe(document.getElementById('wrap'));
         //endregion
     </script>
 </body>
