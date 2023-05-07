@@ -1,6 +1,7 @@
 # 自动设置Iframe的字体大小(rem)
 ##### 开发自适应页面时,使用rem搭配响应式控制类或media等是其中一种解决方案
 ### 本历程解决在iframe中使用rem时,字体大小不随iframe大小变化而变化的问题
+##### iframe本身没有背景色,当变成黄色时,说明iframe的onload事件已经触发,并且iframe的html元素已经加载完毕
 
 ## 注意点
 ### 1. iframe中的html文件通常应与引用处在同一域名下,否则iframe应允许跨域访问
