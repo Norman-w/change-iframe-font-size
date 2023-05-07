@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Change iframe font-size testing fixed windows</title>
+    <style>
+        #wrap { width : 1000px; height:600px; padding: 0; overflow: hidden; border: 4px solid blue;}
+        #frame { width: 800px; height: 500px; border: 1px solid red;}
+        #frame { zoom: .75; -moz-transform: scale(.75); -moz-transform-origin: 0 0;}
+    </style>
+</head>
+<body>
+    <form>
+        <input type="text" name="desc" id="desc" value="没缩放...">
+        <input type="button" value="+" style="font-size: 40px; width: 100px;" onclick="zoomIn()">
+        <input type="button" value="-" style="font-size: 40px; width: 100px;" onclick="zoomOut()">
+    </form>
+    <div id="wrap">
+        <iframe id="frame" src="./frame.html"></iframe>
+    </div>
+    <h2>说明:</h2>
+    <ul>
+        <li>蓝色粗外框为Iframe的container</li>
+        <li>红色框为Iframe的内容外边界</li>
+        <li>绿色虚线为Iframe的内容内边界</li>
+        <li>Iframe加载后，会自动设置Iframe的字体大小为16px</li>
+        <li>当Iframe的大小发生变化时，会自动设置Iframe的字体大小为16px * zoom</li>
+        <li>增减Iframe的容器大小时,设置固定16px大小的字体不会变化,设置rem的字体会跟着变化,没有设置字体的元素也会设置为html根元素的字体大小.</li>
+        <li>使用rem单位的矩形等也会跟着变化</li>
+    </ul>
+    <script>
+        //默认iframe的字体大小
+        let defaultFontSize = 16;
+        //region 手动控制iframe的大小
+        let zoom = 1;
+        function zoomIn() {
+            zoom += .05;
+            document.getElementById('frame').style.zoom = zoom;
+            document.getElementById('frame').style.MozTransform = 'scale(' + zoom + ')';
+            document.getElementById('frame').style.MozTransformOrigin = '0 0';
+            document.getElementById('desc').setAttribute("value", "缩放了" + zoom.toFixed(2) + "倍");
+        }
+        function zoomOut() {
+            zoom -= .05;
+            document.getElementById('frame').style.zoom = zoom;
+            document.getElementById('frame').style.MozTransform = 'scale(' + zoom + ')';
+            document.getElementById('frame').style.MozTransformOrigin = '0 0';
+            document.getElementById('desc').setAttribute("value", "缩放了" + zoom.toFixed(2) + "倍");
+        }
+        //endregion
+        //region 当iFrame加载完成后，可以修改iFrame的样式
+        function onIframeLoad(e) {
+            console.log('iframe loaded', e);
+            document.getElementById('frame').contentWindow.document.body.style.backgroundColor = 'yellow';
+            document.getElementById('frame').contentWindow.document.getElementsByTagName("html")[0].style.fontSize = defaultFontSize + 'px';
+        }
+        //endregion
+        //region 当iFrame的大小发生变化时，可以修改iFrame的样式,设置rem之类
+        function onIframeSizeChange(e) {
+            console.log('iframe size changed', e);
+            document.getElementById('frame').contentWindow.document.getElementsByTagName("html")[0].style.fontSize = defaultFontSize * zoom + 'px';
+        }
+        //endregion
+        //region 绑定iframe的事件
+        document.getElementById('frame').onload = onIframeLoad;
+        document.getElementById('frame').contentWindow.onresize = onIframeSizeChange;
+        //endregion
+    </script>
+</body>
+</html>
